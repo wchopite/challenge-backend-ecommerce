@@ -24,7 +24,8 @@
     "useUnknownInCatchVariables": true,
     "allowUnreachableCode": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*"]
 }
