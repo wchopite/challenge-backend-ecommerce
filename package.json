@@ -14,6 +14,7 @@
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
+    "prepare": "husky",
     "migration:generate": "typeorm-ts-node-esm migration:generate -d src/data-source.ts",
     "migration:run": "typeorm-ts-node-esm migration:run -d src/data-source.ts",
     "migration:revert": "typeorm-ts-node-esm migration:revert -d src/data-source.ts"
@@ -40,6 +41,8 @@
     "@types/node": "^24.19.1",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
