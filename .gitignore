@@ -3,5 +3,6 @@ dist/
 .env
 database.sqlite
 *.js.map
+*.tsbuildinfo
 coverage/
 .DS_Store
