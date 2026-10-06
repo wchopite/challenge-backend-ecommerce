@@ -42,7 +42,7 @@ El formato, ubicación y nivel de detalle quedan a tu criterio. Forma parte de l
 
 ## About this repository
 
-This repo is the starting point for the challenge. It includes NestJS 11, TypeORM 0.3, and support for SQLite (default) or PostgreSQL 17 (via Docker).
+This repo is the starting point for the challenge. It uses NestJS 12, TypeORM 1, and PostgreSQL 17 (via Docker).
 
 TypeScript is configured in strict mode with sensible additional rules (`noUncheckedIndexedAccess`, explicit return types, no `any`, no floating promises, etc.). Run `npm run typecheck` and `npm run lint` before submitting.
 
@@ -52,7 +52,7 @@ Two empty NestJS modules are included: `catalog` and `stock`. Use them, rename t
 
 ## Requirements
 
-- Node.js 22 LTS (`>=22`)
+- Node.js 24 LTS (`>=24`)
 - npm >= 10
 
 Use the version in `.nvmrc` if you rely on nvm:
@@ -70,6 +70,8 @@ cp .env.example .env
 
 ## Running the project
 
+Start PostgreSQL first (see the next section), then:
+
 ```bash
 npm run start:dev
 ```
@@ -80,16 +82,15 @@ The app runs at `http://localhost:3000`. Verify it started with:
 curl http://localhost:3000/health
 ```
 
-## PostgreSQL with Docker (optional)
+## PostgreSQL with Docker
 
 ```bash
 docker compose up -d
 ```
 
-Then update `.env`:
+The connection is already configured in `.env` (copied from `.env.example`):
 
 ```env
-DB_TYPE=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
