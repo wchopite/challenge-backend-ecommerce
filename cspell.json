@@ -1,0 +1,25 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "import": ["@cspell/dict-es-es"],
+  "dictionaries": ["es-es", "node", "npm", "typescript", "softwareTerms"],
+  "words": [
+    "healthcheck",
+    "adminer",
+    "nestjs",
+    "typeorm",
+    "tsconfig",
+    "tsbuildinfo",
+    "commitlint",
+    "lintstaged",
+    "dbaeumer",
+    "esbenp",
+    "tsdk",
+    "ecommerce",
+    "isready",
+    "aceptás",
+    "estructurás",
+    "tenés"
+  ],
+  "ignorePaths": ["node_modules/**", "dist/**", "coverage/**", "package-lock.json", "*.tsbuildinfo"]
+}
