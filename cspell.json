@@ -28,7 +28,14 @@
     "autonumber",
     "aceptás",
     "estructurás",
-    "tenés"
+    "tenés",
+    "probá",
+    "registración",
+    "idempotente",
+    "sobrevenden",
+    "reutilizándolos",
+    "Observabilidad",
+    "deduplica"
   ],
   "ignorePaths": [
     "node_modules/**",

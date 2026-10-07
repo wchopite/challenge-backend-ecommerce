@@ -1,8 +1,190 @@
 # ecommerce-challenge
 
+Backend de catálogo y stock para el challenge de Bidcom. La idea: manejar
+productos (con categorías y variantes) y el stock de cada variante, dejando
+registrado cada movimiento.
+
+## Stack
+
+- Node 24 (LTS) + TypeScript estricto (ESM)
+- NestJS 12 + TypeORM 1 + PostgreSQL 17 (Docker)
+- Jest para tests (unit + e2e)
+- ESLint + Prettier, Husky + commitlint
+- Swagger (OpenAPI) y logs estructurados (pino + CLS)
+
+## Cómo correrlo
+
+**Opción 1 — local (dev, con hot reload):**
+
+```bash
+npm install
+cp .env.example .env
+
+docker compose up -d      # Postgres + Adminer
+npm run db:setup          # corre migraciones y carga datos de ejemplo
+npm run start:dev
+```
+
+**Opción 2 — todo en Docker (un solo comando):**
+
+```bash
+docker compose --profile app up --build
+# levanta Postgres + Adminer + la app (corre migraciones y seed solos)
+```
+
+La app queda en `http://localhost:3000`:
+
+- Swagger: `http://localhost:3000/docs`
+- Adminer: `http://localhost:8080` (Server: `postgres`; user/pass/db salen del `.env`)
+
+## Módulos
+
+Lo separé en 2 contextos, cada uno hexagonal (`domain` / `application` / `infrastructure`):
+
+- **Catalog**: categorías, productos y variantes. Expone un contrato (`CatalogReader`)
+  para que otros contextos consulten variantes por SKU.
+- **Stock**: el stock de cada variante. Guarda el saldo (`stock_items`) y el historial
+  de cambios (`stock_movements`).
+
+Stock usa a Catalog a través de ese contrato: hoy es una llamada in-process; si
+mañana Stock se separa en un servicio, se cambia el adaptador por uno HTTP y listo.
+
+## Endpoints
+
+| Método | Ruta                   | Qué hace                    |
+| ------ | ---------------------- | --------------------------- |
+| POST   | `/stock/movimientos`   | Registra un movimiento      |
+| GET    | `/stock/variants/:sku` | Disponible de una variante  |
+| GET    | `/health/live`         | Liveness                    |
+| GET    | `/health/ready`        | Readiness (chequea la base) |
+| GET    | `/docs`                | Swagger                     |
+
+**`POST /stock/movimientos`**
+
+```
+body:   { "sku": "RUN-42-BLACK", "quantity": 5, "motive": "PURCHASE" }
+header: Idempotency-Key (opcional; si lo envías, es idempotente)
+```
+
+Respuestas: `201` ok · `400` body inválido · `404` SKU inexistente ·
+`409` sin stock suficiente o key repetida.
+
+Motivos: `PURCHASE`, `RETURN`, `ADJUSTMENT_IN` suman; `SALE`, `LOSS`,
+`ADJUSTMENT_OUT` restan. La cantidad siempre es positiva y el motivo define la
+dirección.
+
+## Probarlo
+
+- **Swagger**: abre `/docs` y prueba desde ahí.
+- **REST Client**: `docs/http/stock.http` (y `health.http`).
+- **curl**:
+
+```bash
+curl -X POST http://localhost:3000/stock/movimientos \
+  -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-1' \
+  -d '{"sku":"RUN-42-BLACK","quantity":2,"motive":"SALE"}'
+```
+
+Si envías la misma `Idempotency-Key` dos veces, la segunda responde `409`. Sin
+header, cada request se registra (no deduplica).
+
+SKUs de ejemplo: `RUN-42-BLACK`, `RUN-43-BLACK`, `RUN-42-WHITE`,
+`TRAIL-42-BLACK`, `HOODIE-M-BLACK`, `HOODIE-L-BLACK`.
+
+## Diagramas
+
+Flujo del módulo Stock:
+
+![Stock module flow](docs/architecture/module-structure.png)
+
+Modelo de datos (contextos `Catalog` y `Stock`):
+
+![Data model](docs/architecture/data-model.png)
+
+Secuencia — `POST /stock/movimientos`:
+
+![POST stock movement](docs/stock/register-movement-sequence.svg)
+
+Secuencia — `GET /stock/variants/:sku`:
+
+![GET variant availability](docs/stock/check-availability-sequence.svg)
+
+> Las secuencias están hechas en PlantUML (`docs/stock/*.puml`). Para regenerar los
+> SVG: `npm run diagrams:render`.
+
+## Decisiones
+
+- La cantidad es positiva y el **motivo** define si suma o resta.
+- Una salida sin stock suficiente devuelve **409** y no se registra.
+- La registración es **idempotente** (`Idempotency-Key`): repetir no duplica.
+- El saldo se actualiza en una **transacción** con `UPDATE` condicional, así que
+  dos salidas simultáneas no sobrevenden.
+- El saldo vive en `stock_items` y el historial en `stock_movements`.
+
+## Tests
+
+```bash
+npm test          # unit
+npm run test:e2e  # e2e (requiere Postgres levantado)
+```
+
+## Scripts
+
+| Comando                      | Descripción                       |
+| ---------------------------- | --------------------------------- |
+| `npm run start:dev`          | Dev server con watch              |
+| `npm run build`              | Compila                           |
+| `npm run lint`               | ESLint                            |
+| `npm run typecheck`          | Chequeo de tipos                  |
+| `npm test`                   | Tests unitarios                   |
+| `npm run test:e2e`           | Tests end-to-end                  |
+| `npm run db:setup`           | Migraciones + seed                |
+| `npm run seed`               | Carga datos de ejemplo            |
+| `npm run migration:run`      | Aplica migraciones                |
+| `npm run migration:generate` | Genera una migración              |
+| `npm run diagrams:render`    | Regenera los SVG de los diagramas |
+
+## Futuras mejoras
+
+Cosas que dejaría para una próxima iteración:
+
+**Seguridad**
+
+- Auth con JWT (guard global + `@Public`) y roles. Encaja con el dominio: un
+  ajuste manual (`ADJUSTMENT_*`) pediría rol admin; `SALE` lo hace el sistema.
+- Rate limiting en los endpoints de lectura (`@nestjs/throttler`).
+
+**Evolución**
+
+- Extraer Stock a un servicio propio: como se habla con Catalog por contrato
+  (no por tabla), se cambia el adaptador in-process por uno HTTP y listo.
+- Eventos: consumir `OrderPlaced`/`OrderCancelled` para registrar la salida sola,
+  y emitir `StockLow`/`StockDepleted` (patrón transactional outbox, consumo idempotente).
+- Exponer también GraphQL: los casos de uso son agnósticos del transporte, se
+  agregan resolvers reutilizándolos.
+
+**Observabilidad**
+
+- Métricas (Prometheus) y tracing (OpenTelemetry), apoyadas en el correlation id actual.
+
+**Dominio**
+
+- Reservas de stock para el carrito (con vencimiento).
+- Stock por depósito/ubicación (hoy es una fila por variante).
+
+**Infra / entrega**
+
+- CI (lint + typecheck + tests) y contract testing del OpenAPI.
+
 ---
 
-## Enunciado
+<sub>Fin de la solución. Lo que sigue es el enunciado original del challenge.</sub>
+
+---
+
+## Enunciado original
+
+> Texto original del challenge, incluido acá tal cual como contexto.
 
 ### Contexto
 
@@ -37,101 +219,3 @@ Se espera que el código tenga responsabilidades claras y bien separadas. Cómo 
 Repositorio en GitHub con un historial de commits claro y legible — que se entienda cómo fuiste construyendo la solución — y documentación que refleje cómo pensaste el problema, cómo está organizado el sistema, las decisiones de diseño que tomaste y, si aplica, cómo correr o probar tu solución más allá de lo que ya describe este README.
 
 El formato, ubicación y nivel de detalle quedan a tu criterio. Forma parte de la evaluación.
-
----
-
-## About this repository
-
-This repo is the starting point for the challenge. It uses NestJS 12, TypeORM 1, and PostgreSQL 17 (via Docker).
-
-TypeScript is configured in strict mode with sensible additional rules (`noUncheckedIndexedAccess`, explicit return types, no `any`, no floating promises, etc.). Run `npm run typecheck` and `npm run lint` before submitting.
-
-## Diagrams
-
-Stock module flow:
-
-![Stock module flow](docs/architecture/module-structure.png)
-
-Data model (bounded contexts `Catalog` and `Stock`):
-
-![Data model](docs/architecture/data-model.png)
-
-Sequence — `POST /stock/movimientos`:
-
-![POST stock movement](docs/stock/register-movement-sequence.svg)
-
-Sequence — `GET /stock/variants/:sku`:
-
-![GET variant availability](docs/stock/check-availability-sequence.svg)
-
-> Sequence diagrams are authored in PlantUML (`docs/stock/*.puml`). Regenerate the SVGs with `npm run diagrams:render`.
-
-## Project structure
-
-Two empty NestJS modules are included: `catalog` and `stock`. Use them, rename them, or reorganize — whatever fits your design.
-
-## Requirements
-
-- Node.js 24 LTS (`>=24`)
-- npm >= 10
-
-Use the version in `.nvmrc` if you rely on nvm:
-
-```bash
-nvm use
-```
-
-## Installation
-
-```bash
-npm install
-cp .env.example .env
-```
-
-## Running the project
-
-Start PostgreSQL first (see the next section), then:
-
-```bash
-npm run start:dev
-```
-
-The app runs at `http://localhost:3000`. Verify it started with:
-
-```bash
-curl http://localhost:3000/health
-```
-
-## PostgreSQL with Docker
-
-```bash
-docker compose up -d
-```
-
-The connection is already configured in `.env` (copied from `.env.example`):
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_DATABASE=ecommerce_challenge
-```
-
-## Migrations
-
-Schema is managed by migrations (set `DB_SYNCHRONIZE=false`, the default). To create or apply:
-
-```bash
-npm run migration:generate -- src/shared/infrastructure/database/migrations/MigrationName
-npm run migration:run
-```
-
-## Scripts
-
-| Command              | Description           |
-| -------------------- | --------------------- |
-| `npm run start:dev`  | Dev server with watch |
-| `npm run build`      | Compile               |
-| `npm run lint`       | ESLint                |
-| `npm run typecheck`  | Type checking         |
