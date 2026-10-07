@@ -1,6 +1,6 @@
 import type { Motive } from '../../motive/motive.js';
 
-export interface RegisterStockMovementCommand {
+export interface RegisterStockMovementInput {
   readonly sku: string;
   readonly quantity: number;
   readonly motive: Motive;
@@ -19,5 +19,5 @@ export interface StockMovementResult {
 export const REGISTER_STOCK_MOVEMENT = Symbol('REGISTER_STOCK_MOVEMENT');
 
 export interface RegisterStockMovement {
-  execute(command: RegisterStockMovementCommand): Promise<StockMovementResult>;
+  execute(input: RegisterStockMovementInput): Promise<StockMovementResult>;
 }

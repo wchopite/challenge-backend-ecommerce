@@ -5,7 +5,7 @@ import { VariantNotFoundError } from '../../domain/errors/variant-not-found.erro
 import { assertPositiveQuantity, type StockMovement } from '../../domain/models/stock-movement.js';
 import type {
   RegisterStockMovement,
-  RegisterStockMovementCommand,
+  RegisterStockMovementInput,
   StockMovementResult,
 } from '../../domain/ports/in/register-stock-movement.js';
 import { STOCK_REPOSITORY, type StockRepository } from '../../domain/ports/out/stock.repository.js';
@@ -18,28 +18,28 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
     @Inject(STOCK_REPOSITORY) private readonly stock: StockRepository,
   ) {}
 
-  async execute(command: RegisterStockMovementCommand): Promise<StockMovementResult> {
-    assertPositiveQuantity(command.quantity);
+  async execute(input: RegisterStockMovementInput): Promise<StockMovementResult> {
+    assertPositiveQuantity(input.quantity);
 
-    const variant = await this.catalog.findBySku(command.sku);
+    const variant = await this.catalog.findBySku(input.sku);
 
     if (variant === null) {
-      throw new VariantNotFoundError(command.sku);
+      throw new VariantNotFoundError(input.sku);
     }
 
     const movement: StockMovement = {
       id: randomUUID(),
       variantId: variant.id,
       sku: variant.sku,
-      quantity: command.quantity,
-      motive: command.motive,
+      quantity: input.quantity,
+      motive: input.motive,
       occurredAt: new Date(),
     };
 
     const outcome = await this.stock.register(movement);
 
     if (outcome.status === 'insufficient') {
-      throw new InsufficientStockError(outcome.available, command.quantity);
+      throw new InsufficientStockError(outcome.available, input.quantity);
     }
 
     return {
