@@ -6,7 +6,7 @@ export class StockMovementOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'variant_id' })
+  @Column({ name: 'variant_id', type: 'uuid' })
   variantId: string;
 
   @Column()

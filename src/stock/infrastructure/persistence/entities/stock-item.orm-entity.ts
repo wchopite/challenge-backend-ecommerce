@@ -13,7 +13,7 @@ export class StockItemOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'variant_id', unique: true })
+  @Column({ name: 'variant_id', type: 'uuid', unique: true })
   variantId: string;
 
   @Column({ type: 'int', default: 0 })
