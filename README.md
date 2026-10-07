@@ -10,7 +10,7 @@ registrado cada movimiento.
 - NestJS 12 + TypeORM 1 + PostgreSQL 17 (Docker)
 - Jest para tests (unit + e2e)
 - ESLint + Prettier, Husky + commitlint
-- Swagger (OpenAPI) y logs estructurados (pino + CLS)
+- Swagger (OpenAPI) y logs estructurados (pino + CLS) con correlation id (`x-request-id`)
 
 ## Cómo correrlo
 
@@ -67,7 +67,8 @@ header: Idempotency-Key (opcional; si lo envías, es idempotente)
 ```
 
 Respuestas: `201` ok · `400` body inválido · `404` SKU inexistente ·
-`409` sin stock suficiente o key repetida.
+`409` sin stock suficiente o key repetida. Todas las respuestas de error
+incluyen `requestId`.
 
 Motivos: `PURCHASE`, `RETURN`, `ADJUSTMENT_IN` suman; `SALE`, `LOSS`,
 `ADJUSTMENT_OUT` restan. La cantidad siempre es positiva y el motivo define la
@@ -122,6 +123,24 @@ Secuencia — `GET /stock/variants/:sku`:
 - El saldo vive en `stock_items` y el historial en `stock_movements`.
 - Dejé **todo en `main` a propósito**: así la historia se lee lineal y se sigue el
   paso a paso. En un equipo, lo ideal es trabajar con **feature branches** + PRs.
+
+## Observabilidad
+
+- **Correlation id end-to-end**: se respeta `x-request-id` si viene (si no, se
+  genera un UUID) y se devuelve en la respuesta. Viaja en el contexto del request
+  (`nestjs-cls`/AsyncLocalStorage) y aparece como `requestId` en toda línea de
+  log, además del body de los errores.
+- **Logs estructurados** (pino): JSON en prod y pretty en dev. Cada línea lleva
+  metadata fija (`service`, `env`, `version`, `pid`, `hostname`) para filtrar por
+  servicio/entorno/versión. El nivel por status: 5xx `error`, 4xx `warn`, resto `info`.
+- **Sin ruido de probes**: `/health*` y `/docs*` no generan línea de access log
+  (los healthchecks de Docker/k8s pegan seguido).
+- **Errores**: `DomainExceptionFilter` mapea el dominio a HTTP; un
+  `AllExceptionsFilter` (catch-all) cubre validación, rutas y errores inesperados.
+  Todos devuelven `{ statusCode, error, message, requestId }`. Los 5xx se loguean
+  con stack sólo server-side y responden un mensaje genérico (no filtran internals).
+- **Graceful shutdown**: en `SIGTERM`/`SIGINT` se cierran las conexiones de la
+  base (`enableShutdownHooks`).
 
 ## Tests
 
