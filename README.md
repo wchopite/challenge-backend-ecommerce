@@ -100,10 +100,10 @@ DB_DATABASE=ecommerce_challenge
 
 ## Migrations
 
-By default the app uses `synchronize: true` in development for fast iteration. If you prefer migrations:
+Schema is managed by migrations (set `DB_SYNCHRONIZE=false`, the default). To create or apply:
 
 ```bash
-npm run migration:generate -- src/migrations/MigrationName
+npm run migration:generate -- migrations/MigrationName
 npm run migration:run
 ```
 
