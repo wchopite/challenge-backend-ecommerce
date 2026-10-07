@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InsufficientStockError } from '../../domain/errors/insufficient-stock.error.js';
 import { MovementAlreadyProcessedError } from '../../domain/errors/movement-already-processed.error.js';
 import { VariantNotFoundError } from '../../domain/errors/variant-not-found.error.js';
@@ -15,6 +15,8 @@ import { VARIANT_CATALOG, type VariantCatalog } from '../../domain/ports/out/var
 
 @Injectable()
 export class RegisterStockMovementUseCase implements RegisterStockMovement {
+  private readonly logger = new Logger(RegisterStockMovementUseCase.name);
+
   constructor(
     @Inject(VARIANT_CATALOG) private readonly catalog: VariantCatalog,
     @Inject(STOCK_REPOSITORY) private readonly stock: StockRepository,
@@ -47,6 +49,13 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
     if (outcome.status === MovementStatus.DUPLICATE) {
       throw new MovementAlreadyProcessedError(input.idempotencyKey);
     }
+
+    this.logger.log({
+      sku: movement.sku,
+      motive: movement.motive,
+      quantity: movement.quantity,
+      available: outcome.available,
+    });
 
     return {
       id: movement.id,
