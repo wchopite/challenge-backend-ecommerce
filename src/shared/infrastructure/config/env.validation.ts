@@ -22,7 +22,7 @@ export class EnvironmentVariables {
   PORT: number = 3000;
 
   @IsOptional()
-  @IsString()
+  @IsIn(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
   LOG_LEVEL?: string;
 
   @IsString()

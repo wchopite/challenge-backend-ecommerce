@@ -9,6 +9,8 @@ async function bootstrap(): Promise<void> {
 
   app.useLogger(app.get(Logger));
 
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
