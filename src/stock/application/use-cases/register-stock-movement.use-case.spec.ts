@@ -1,6 +1,7 @@
 import { RegisterStockMovementUseCase } from './register-stock-movement.use-case.js';
 import { InsufficientStockError } from '../../domain/errors/insufficient-stock.error.js';
 import { InvalidQuantityError } from '../../domain/errors/invalid-quantity.error.js';
+import { MovementAlreadyProcessedError } from '../../domain/errors/movement-already-processed.error.js';
 import { VariantNotFoundError } from '../../domain/errors/variant-not-found.error.js';
 import { deltaOf, Motive } from '../../domain/motive/motive.js';
 import type { StockMovement } from '../../domain/models/stock-movement.js';
@@ -21,13 +22,18 @@ class InMemoryVariantCatalog implements VariantCatalog {
 
 class InMemoryStockRepository implements StockRepository {
   private readonly balances = new Map<string, number>();
+  private readonly keys = new Set<string>();
   readonly movements: StockMovement[] = [];
 
   seed(variantId: string, available: number): void {
     this.balances.set(variantId, available);
   }
 
-  register(movement: StockMovement, _idempotencyKey: string): Promise<RegisterMovementOutcome> {
+  register(movement: StockMovement, idempotencyKey: string): Promise<RegisterMovementOutcome> {
+    if (this.keys.has(idempotencyKey)) {
+      return Promise.resolve({ status: MovementStatus.DUPLICATE });
+    }
+
     const current = this.balances.get(movement.variantId) ?? 0;
     const next = current + deltaOf(movement.motive, movement.quantity);
 
@@ -35,6 +41,7 @@ class InMemoryStockRepository implements StockRepository {
       return Promise.resolve({ status: MovementStatus.INSUFFICIENT, available: current });
     }
 
+    this.keys.add(idempotencyKey);
     this.balances.set(movement.variantId, next);
     this.movements.push(movement);
 
@@ -122,5 +129,52 @@ describe('RegisterStockMovementUseCase', () => {
         idempotencyKey: 'key-5',
       }),
     ).rejects.toThrow(InvalidQuantityError);
+  });
+
+  it('applies a movement only once for the same idempotency key', async () => {
+    const stock = new InMemoryStockRepository();
+    stock.seed(variant.id, 0);
+    const useCase = build(stock);
+
+    await useCase.execute({
+      sku: 'SKU-1',
+      quantity: 5,
+      motive: Motive.PURCHASE,
+      idempotencyKey: 'key-dup',
+    });
+
+    await expect(
+      useCase.execute({
+        sku: 'SKU-1',
+        quantity: 5,
+        motive: Motive.PURCHASE,
+        idempotencyKey: 'key-dup',
+      }),
+    ).rejects.toThrow(MovementAlreadyProcessedError);
+
+    expect(stock.movements).toHaveLength(1);
+    await expect(stock.getAvailable(variant.id)).resolves.toBe(5);
+  });
+
+  it('applies separate movements for different idempotency keys', async () => {
+    const stock = new InMemoryStockRepository();
+    stock.seed(variant.id, 0);
+    const useCase = build(stock);
+
+    await useCase.execute({
+      sku: 'SKU-1',
+      quantity: 5,
+      motive: Motive.PURCHASE,
+      idempotencyKey: 'key-a',
+    });
+    await useCase.execute({
+      sku: 'SKU-1',
+      quantity: 5,
+      motive: Motive.PURCHASE,
+      idempotencyKey: 'key-b',
+    });
+
+    expect(stock.movements).toHaveLength(2);
+    await expect(stock.getAvailable(variant.id)).resolves.toBe(10);
   });
 });

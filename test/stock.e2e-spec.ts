@@ -125,4 +125,26 @@ describe('Stock endpoints (e2e)', () => {
       .send({ sku, quantity: 0, motive: 'PURCHASE' })
       .expect(400);
   });
+
+  it('rejects a duplicated idempotency key without changing stock (409)', async () => {
+    const key = `e2e-dup-${randomUUID()}`;
+
+    const before = await request(app.getHttpServer()).get(`/stock/variants/${sku}`).expect(200);
+
+    await request(app.getHttpServer())
+      .post('/stock/movimientos')
+      .set('Idempotency-Key', key)
+      .send({ sku, quantity: 2, motive: 'PURCHASE' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/stock/movimientos')
+      .set('Idempotency-Key', key)
+      .send({ sku, quantity: 2, motive: 'PURCHASE' })
+      .expect(409);
+
+    const after = await request(app.getHttpServer()).get(`/stock/variants/${sku}`).expect(200);
+
+    expect(after.body.available).toBe((before.body.available as number) + 2);
+  });
 });
