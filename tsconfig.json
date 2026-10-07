@@ -28,5 +28,5 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "test/**/*", "migrations/**/*"]
+  "include": ["src/**/*", "test/**/*", "db/migrations/**/*"]
 }

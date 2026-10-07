@@ -103,7 +103,7 @@ DB_DATABASE=ecommerce_challenge
 Schema is managed by migrations (set `DB_SYNCHRONIZE=false`, the default). To create or apply:
 
 ```bash
-npm run migration:generate -- migrations/MigrationName
+npm run migration:generate -- db/migrations/MigrationName
 npm run migration:run
 ```
 
