@@ -1,5 +1,14 @@
 import { plainToInstance } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  validateSync,
+} from 'class-validator';
 
 export class EnvironmentVariables {
   @IsOptional()
@@ -31,6 +40,10 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   DB_DATABASE: string;
+
+  @IsOptional()
+  @IsIn(['true', 'false'])
+  DB_SYNCHRONIZE?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

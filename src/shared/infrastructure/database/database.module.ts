@@ -14,7 +14,7 @@ import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
         password: config.get<string>('database.password', 'postgres'),
         database: config.get<string>('database.database', 'ecommerce_challenge'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: config.get<boolean>('database.synchronize', false),
       }),
     }),
   ],
