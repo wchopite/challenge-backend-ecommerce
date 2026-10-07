@@ -1,7 +1,10 @@
+import { join } from 'node:path';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
+const baseDir = import.meta.dirname;
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -10,7 +13,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME ?? 'postgres',
   password: process.env.DB_PASSWORD ?? 'postgres',
   database: process.env.DB_DATABASE ?? 'ecommerce_challenge',
-  entities: ['src/**/*.orm-entity.ts'],
-  migrations: ['src/shared/infrastructure/database/migrations/*.ts'],
+  entities: [join(baseDir, '../../../**/*.orm-entity.{ts,js}')],
+  migrations: [join(baseDir, 'migrations/*.{ts,js}')],
   synchronize: false,
 });
