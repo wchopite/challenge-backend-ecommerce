@@ -5,5 +5,9 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
+  },
+  "rest-client.environmentVariables": {
+    "local": { "baseUrl": "http://localhost:3000" },
+    "docker": { "baseUrl": "http://localhost:3000" }
   }
 }
