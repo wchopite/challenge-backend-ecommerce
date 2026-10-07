@@ -24,6 +24,7 @@ import { RequestContextService } from './request-context.service.js';
       useFactory: (config: ConfigService) =>
         buildLoggerConfig({
           level: config.get<string>('app.logLevel', 'info'),
+          env: config.get<string>('app.env', 'development'),
           pretty: config.get<boolean>('app.logPretty', false),
         }),
     }),
