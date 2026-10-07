@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
+import { setupSwagger } from './shared/infrastructure/http/swagger.js';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -15,6 +16,8 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
+
+  setupSwagger(app);
 
   const rawPort = process.env.PORT;
   const port = rawPort !== undefined ? Number(rawPort) : 3000;

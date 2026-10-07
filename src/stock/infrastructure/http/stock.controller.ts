@@ -10,6 +10,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   GET_VARIANT_AVAILABILITY,
   type GetVariantAvailability,
@@ -22,6 +23,7 @@ import { RegisterStockMovementDto } from './dto/register-stock-movement.dto.js';
 import { StockMovementResponseDto } from './dto/stock-movement-response.dto.js';
 import { VariantAvailabilityResponseDto } from './dto/variant-availability-response.dto.js';
 
+@ApiTags('stock')
 @Controller('stock')
 export class StockController {
   constructor(
@@ -31,6 +33,11 @@ export class StockController {
 
   @Post('movimientos')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a stock movement (inbound or outbound)' })
+  @ApiResponse({ status: 201, description: 'Movement registered', type: StockMovementResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid payload or missing Idempotency-Key' })
+  @ApiResponse({ status: 404, description: 'Variant not found' })
+  @ApiResponse({ status: 409, description: 'Insufficient stock or duplicated idempotency key' })
   register(
     @Body() dto: RegisterStockMovementDto,
     @Headers('idempotency-key') idempotencyKey?: string,
@@ -48,6 +55,10 @@ export class StockController {
   }
 
   @Get('variants/:sku')
+  @ApiOperation({ summary: 'Get the available stock for a variant' })
+  @ApiParam({ name: 'sku', description: 'Variant SKU', example: 'RUN-42-BLACK' })
+  @ApiResponse({ status: 200, description: 'Availability', type: VariantAvailabilityResponseDto })
+  @ApiResponse({ status: 404, description: 'Variant not found' })
   availability(@Param('sku') sku: string): Promise<VariantAvailabilityResponseDto> {
     return this.getAvailability.execute(sku);
   }

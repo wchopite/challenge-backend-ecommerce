@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
   type HealthCheckResult,
@@ -8,6 +9,7 @@ import {
 
 const DB_PING_TIMEOUT_MS = 1500;
 
+@ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(
@@ -16,18 +18,21 @@ export class HealthController {
   ) {}
 
   @Get('live')
+  @ApiOperation({ summary: 'Liveness probe (process is up)' })
   live(): { status: string } {
     return { status: 'ok' };
   }
 
   @Get()
   @HealthCheck()
+  @ApiOperation({ summary: 'Readiness probe (checks the database)' })
   check(): Promise<HealthCheckResult> {
     return this.runChecks();
   }
 
   @Get('ready')
   @HealthCheck()
+  @ApiOperation({ summary: 'Readiness probe (checks the database)' })
   ready(): Promise<HealthCheckResult> {
     return this.runChecks();
   }
