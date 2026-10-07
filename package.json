@@ -12,6 +12,7 @@
     "start:prod": "node dist/main",
     "build": "nest build",
     "seed": "nest build && node dist/seed.js",
+    "db:setup": "npm run migration:run && npm run seed",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
