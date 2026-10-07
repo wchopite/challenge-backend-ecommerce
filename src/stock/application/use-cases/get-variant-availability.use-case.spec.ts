@@ -1,10 +1,8 @@
 import { GetVariantAvailabilityUseCase } from './get-variant-availability.use-case.js';
 import { VariantNotFoundError } from '../../domain/errors/variant-not-found.error.js';
+import type { RegisterMovementOutcome } from '../../domain/models/register-movement-outcome.js';
 import type { StockMovement } from '../../domain/models/stock-movement.js';
-import type {
-  RegisterMovementOutcome,
-  StockRepository,
-} from '../../domain/ports/out/stock.repository.js';
+import type { StockRepository } from '../../domain/ports/out/stock.repository.js';
 import type { VariantCatalog, VariantRef } from '../../domain/ports/out/variant-catalog.js';
 
 class InMemoryVariantCatalog implements VariantCatalog {

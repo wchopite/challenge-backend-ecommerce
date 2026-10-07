@@ -7,7 +7,7 @@ import type { StockMovement } from '../../domain/models/stock-movement.js';
 import {
   MovementStatus,
   type RegisterMovementOutcome,
-} from '../../domain/ports/out/stock.repository.js';
+} from '../../domain/models/register-movement-outcome.js';
 import type { StockRepository } from '../../domain/ports/out/stock.repository.js';
 import type { VariantCatalog, VariantRef } from '../../domain/ports/out/variant-catalog.js';
 

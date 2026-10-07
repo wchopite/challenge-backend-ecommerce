@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, type Repository } from 'typeorm';
-import { Direction, directionOf } from '../../../domain/motive/motive.js';
-import type { StockMovement } from '../../../domain/models/stock-movement.js';
 import {
   MovementStatus,
   type RegisterMovementOutcome,
-  type StockRepository,
-} from '../../../domain/ports/out/stock.repository.js';
+} from '../../../domain/models/register-movement-outcome.js';
+import type { StockMovement } from '../../../domain/models/stock-movement.js';
+import { Direction, directionOf } from '../../../domain/motive/motive.js';
+import type { StockRepository } from '../../../domain/ports/out/stock.repository.js';
 import { StockItemOrmEntity } from '../entities/stock-item.orm-entity.js';
 import { StockMovementOrmEntity } from '../entities/stock-movement.orm-entity.js';
 import { StockMovementMapper } from '../mappers/stock-movement.mapper.js';

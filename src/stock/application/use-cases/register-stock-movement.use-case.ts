@@ -8,11 +8,8 @@ import type {
   RegisterStockMovementInput,
   StockMovementResult,
 } from '../../domain/ports/in/register-stock-movement.js';
-import {
-  MovementStatus,
-  STOCK_REPOSITORY,
-  type StockRepository,
-} from '../../domain/ports/out/stock.repository.js';
+import { MovementStatus } from '../../domain/models/register-movement-outcome.js';
+import { STOCK_REPOSITORY, type StockRepository } from '../../domain/ports/out/stock.repository.js';
 import { VARIANT_CATALOG, type VariantCatalog } from '../../domain/ports/out/variant-catalog.js';
 
 @Injectable()
