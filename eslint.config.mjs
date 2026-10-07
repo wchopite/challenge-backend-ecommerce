@@ -18,6 +18,11 @@ export default tseslint.config(
       },
     },
     rules: {
+      'no-restricted-globals': [
+        'error',
+        { name: 'parseInt', message: 'Use Number.parseInt instead.' },
+        { name: 'parseFloat', message: 'Use Number.parseFloat instead.' },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': [
         'error',
