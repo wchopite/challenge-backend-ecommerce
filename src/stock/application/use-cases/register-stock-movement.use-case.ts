@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { InsufficientStockError } from '../../domain/errors/insufficient-stock.error.js';
+import { MovementAlreadyProcessedError } from '../../domain/errors/movement-already-processed.error.js';
 import { VariantNotFoundError } from '../../domain/errors/variant-not-found.error.js';
 import { assertPositiveQuantity, type StockMovement } from '../../domain/models/stock-movement.js';
 import type {
@@ -41,6 +42,10 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
 
     if (outcome.status === MovementStatus.INSUFFICIENT) {
       throw new InsufficientStockError(outcome.available, input.quantity);
+    }
+
+    if (outcome.status === MovementStatus.DUPLICATE) {
+      throw new MovementAlreadyProcessedError(input.idempotencyKey);
     }
 
     return {
