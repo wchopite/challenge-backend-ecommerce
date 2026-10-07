@@ -22,5 +22,6 @@ import { TypeOrmStockRepository } from './infrastructure/persistence/repositorie
     { provide: STOCK_REPOSITORY, useClass: TypeOrmStockRepository },
     { provide: VARIANT_CATALOG, useClass: CatalogVariantAdapter },
   ],
+  exports: [REGISTER_STOCK_MOVEMENT],
 })
 export class StockModule {}
