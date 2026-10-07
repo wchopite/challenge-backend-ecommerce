@@ -1,16 +1,20 @@
-export enum Motive {
-  PURCHASE = 'PURCHASE',
-  RETURN = 'RETURN',
-  ADJUSTMENT_IN = 'ADJUSTMENT_IN',
-  SALE = 'SALE',
-  LOSS = 'LOSS',
-  ADJUSTMENT_OUT = 'ADJUSTMENT_OUT',
-}
+export const Motive = {
+  PURCHASE: 'PURCHASE',
+  RETURN: 'RETURN',
+  ADJUSTMENT_IN: 'ADJUSTMENT_IN',
+  SALE: 'SALE',
+  LOSS: 'LOSS',
+  ADJUSTMENT_OUT: 'ADJUSTMENT_OUT',
+} as const;
 
-export enum Direction {
-  IN = 'IN',
-  OUT = 'OUT',
-}
+export type Motive = (typeof Motive)[keyof typeof Motive];
+
+export const Direction = {
+  IN: 'IN',
+  OUT: 'OUT',
+} as const;
+
+export type Direction = (typeof Direction)[keyof typeof Direction];
 
 const DIRECTION_BY_MOTIVE: Record<Motive, Direction> = {
   [Motive.PURCHASE]: Direction.IN,

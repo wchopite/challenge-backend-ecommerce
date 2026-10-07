@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 import { Motive } from '../../../domain/motive/motive.js';
 
 export class RegisterStockMovementDto {
@@ -10,6 +10,6 @@ export class RegisterStockMovementDto {
   @Min(1)
   quantity: number;
 
-  @IsEnum(Motive)
+  @IsIn(Object.values(Motive))
   motive: Motive;
 }
