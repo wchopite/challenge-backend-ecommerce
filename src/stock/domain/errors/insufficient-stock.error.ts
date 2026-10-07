@@ -1,10 +1,13 @@
-import { DomainError } from '../../../shared/domain/errors/domain.error.js';
+import { DomainError, DomainErrorCode } from '../../../shared/domain/errors/domain.error.js';
 
 export class InsufficientStockError extends DomainError {
   constructor(
     readonly available: number,
     readonly requested: number,
   ) {
-    super(`Insufficient stock: available ${available}, requested ${requested}`, 'CONFLICT');
+    super(
+      `Insufficient stock: available ${available}, requested ${requested}`,
+      DomainErrorCode.CONFLICT,
+    );
   }
 }

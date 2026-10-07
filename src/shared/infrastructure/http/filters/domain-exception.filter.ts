@@ -6,12 +6,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { DomainError, type DomainErrorCode } from '../../../domain/errors/domain.error.js';
+import { DomainError, DomainErrorCode } from '../../../domain/errors/domain.error.js';
 
 const STATUS_BY_CODE: Record<DomainErrorCode, number> = {
-  NOT_FOUND: HttpStatus.NOT_FOUND,
-  CONFLICT: HttpStatus.CONFLICT,
-  INVALID_ARGUMENT: HttpStatus.BAD_REQUEST,
+  [DomainErrorCode.NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [DomainErrorCode.CONFLICT]: HttpStatus.CONFLICT,
+  [DomainErrorCode.INVALID_ARGUMENT]: HttpStatus.BAD_REQUEST,
 };
 
 @Catch(DomainError)
