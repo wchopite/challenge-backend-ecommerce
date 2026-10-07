@@ -172,6 +172,15 @@ Cosas que dejaría para una próxima iteración:
 - Reservas de stock para el carrito (con vencimiento).
 - Stock por depósito/ubicación (hoy es una fila por variante).
 
+**Rendimiento y calidad**
+
+- Tests de carga con **k6** (varios escenarios: muchos `SALE` concurrentes sobre
+  el mismo SKU, picos de lectura de disponibilidad, etc.).
+- **Índices** en la BD según las consultas reales (ej. GIN sobre `variants.attributes`
+  o un índice de expresión para una clave caliente; hoy ya hay `UNIQUE` en `sku`,
+  `variant_id` e `idempotency_key`).
+- **Cache** (ej. Redis) para lecturas de disponibilidad/catálogo, si el tráfico lo pide.
+
 **Infra / entrega**
 
 - CI (lint + typecheck + tests) y contract testing del OpenAPI.
