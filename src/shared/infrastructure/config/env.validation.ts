@@ -21,6 +21,10 @@ export class EnvironmentVariables {
   @Max(65535)
   PORT: number = 3000;
 
+  @IsOptional()
+  @IsString()
+  LOG_LEVEL?: string;
+
   @IsString()
   @IsNotEmpty()
   DB_HOST: string;

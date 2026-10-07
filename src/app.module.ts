@@ -7,6 +7,7 @@ import { appConfig, databaseConfig } from './shared/infrastructure/config/config
 import { validateEnv } from './shared/infrastructure/config/env.validation.js';
 import { DatabaseModule } from './shared/infrastructure/database/database.module.js';
 import { DomainExceptionFilter } from './shared/infrastructure/http/filters/domain-exception.filter.js';
+import { ObservabilityModule } from './shared/infrastructure/observability/observability.module.js';
 import { StockModule } from './stock/stock.module.js';
 
 @Module({
@@ -16,6 +17,7 @@ import { StockModule } from './stock/stock.module.js';
       validate: validateEnv,
       load: [appConfig, databaseConfig],
     }),
+    ObservabilityModule,
     DatabaseModule,
     CatalogModule,
     StockModule,

@@ -1,9 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.useLogger(app.get(Logger));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -21,7 +24,7 @@ async function bootstrap(): Promise<void> {
   }
 
   await app.listen(port);
-  console.log(`App running on http://localhost:${port}`);
+  app.get(Logger).log(`App running on http://localhost:${port}`);
 }
 
 void bootstrap();
