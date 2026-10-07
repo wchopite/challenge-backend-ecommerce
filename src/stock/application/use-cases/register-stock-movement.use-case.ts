@@ -8,7 +8,11 @@ import type {
   RegisterStockMovementInput,
   StockMovementResult,
 } from '../../domain/ports/in/register-stock-movement.js';
-import { STOCK_REPOSITORY, type StockRepository } from '../../domain/ports/out/stock.repository.js';
+import {
+  MovementStatus,
+  STOCK_REPOSITORY,
+  type StockRepository,
+} from '../../domain/ports/out/stock.repository.js';
 import { VARIANT_CATALOG, type VariantCatalog } from '../../domain/ports/out/variant-catalog.js';
 
 @Injectable()
@@ -38,7 +42,7 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
 
     const outcome = await this.stock.register(movement);
 
-    if (outcome.status === 'insufficient') {
+    if (outcome.status === MovementStatus.INSUFFICIENT) {
       throw new InsufficientStockError(outcome.available, input.quantity);
     }
 

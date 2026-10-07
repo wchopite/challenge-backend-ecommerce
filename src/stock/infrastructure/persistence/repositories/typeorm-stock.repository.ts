@@ -3,9 +3,10 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, type Repository } from 'typeorm';
 import { Direction, directionOf } from '../../../domain/motive/motive.js';
 import type { StockMovement } from '../../../domain/models/stock-movement.js';
-import type {
-  RegisterMovementOutcome,
-  StockRepository,
+import {
+  MovementStatus,
+  type RegisterMovementOutcome,
+  type StockRepository,
 } from '../../../domain/ports/out/stock.repository.js';
 import { StockItemOrmEntity } from '../entities/stock-item.orm-entity.js';
 import { StockMovementOrmEntity } from '../entities/stock-movement.orm-entity.js';
@@ -43,7 +44,7 @@ export class TypeOrmStockRepository implements StockRepository {
           const current = await manager.findOne(StockItemOrmEntity, {
             where: { variantId: movement.variantId },
           });
-          return { status: 'insufficient', available: current?.available ?? 0 };
+          return { status: MovementStatus.INSUFFICIENT, available: current?.available ?? 0 };
         }
       } else {
         await manager
@@ -61,7 +62,7 @@ export class TypeOrmStockRepository implements StockRepository {
         where: { variantId: movement.variantId },
       });
 
-      return { status: 'applied', available: item?.available ?? 0 };
+      return { status: MovementStatus.APPLIED, available: item?.available ?? 0 };
     });
   }
 

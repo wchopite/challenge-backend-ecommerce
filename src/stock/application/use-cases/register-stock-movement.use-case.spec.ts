@@ -4,7 +4,10 @@ import { InvalidQuantityError } from '../../domain/errors/invalid-quantity.error
 import { VariantNotFoundError } from '../../domain/errors/variant-not-found.error.js';
 import { deltaOf, Motive } from '../../domain/motive/motive.js';
 import type { StockMovement } from '../../domain/models/stock-movement.js';
-import type { RegisterMovementOutcome } from '../../domain/ports/out/stock.repository.js';
+import {
+  MovementStatus,
+  type RegisterMovementOutcome,
+} from '../../domain/ports/out/stock.repository.js';
 import type { StockRepository } from '../../domain/ports/out/stock.repository.js';
 import type { VariantCatalog, VariantRef } from '../../domain/ports/out/variant-catalog.js';
 
@@ -29,13 +32,13 @@ class InMemoryStockRepository implements StockRepository {
     const next = current + deltaOf(movement.motive, movement.quantity);
 
     if (next < 0) {
-      return Promise.resolve({ status: 'insufficient', available: current });
+      return Promise.resolve({ status: MovementStatus.INSUFFICIENT, available: current });
     }
 
     this.balances.set(movement.variantId, next);
     this.movements.push(movement);
 
-    return Promise.resolve({ status: 'applied', available: next });
+    return Promise.resolve({ status: MovementStatus.APPLIED, available: next });
   }
 
   getAvailable(variantId: string): Promise<number> {
