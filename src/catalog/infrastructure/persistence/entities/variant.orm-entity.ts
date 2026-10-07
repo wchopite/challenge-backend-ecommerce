@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import {
 import { ProductOrmEntity } from './product.orm-entity.js';
 
 @Entity('variants')
+@Index('IDX_variants_product_id', ['productId'])
 export class VariantOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
