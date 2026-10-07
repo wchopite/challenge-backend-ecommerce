@@ -13,7 +13,7 @@ import { StockModule } from './stock/stock.module.js';
       useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
         type: 'postgres' as const,
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+        port: Number.parseInt(config.get<string>('DB_PORT', '5432'), 10),
         username: config.get<string>('DB_USERNAME', 'postgres'),
         password: config.get<string>('DB_PASSWORD', 'postgres'),
         database: config.get<string>('DB_DATABASE', 'ecommerce_challenge'),
