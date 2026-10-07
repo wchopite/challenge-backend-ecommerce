@@ -21,9 +21,20 @@
     "isready",
     "timestamptz",
     "datname",
+    "plantuml",
+    "startuml",
+    "enduml",
+    "autonumber",
     "aceptás",
     "estructurás",
     "tenés"
   ],
-  "ignorePaths": ["node_modules/**", "dist/**", "coverage/**", "package-lock.json", "*.tsbuildinfo"]
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "coverage/**",
+    "package-lock.json",
+    "*.tsbuildinfo",
+    "docs/diagrams/*.svg"
+  ]
 }

@@ -1,0 +1,47 @@
+@startuml
+title POST /stock/movimientos — registrar movimiento
+autonumber
+actor "Cliente" as Client
+participant "ValidationPipe" as VP
+participant "StockController" as Ctrl
+participant "RegisterStockMovementUseCase" as UC
+participant "CatalogReader (contrato -> Catalog)" as Catalog
+participant "StockRepository" as Repo
+database "PostgreSQL" as DB
+
+Client -> VP : POST /stock/movimientos\n{ sku, quantity, motive }\n+ header Idempotency-Key
+alt payload o header invalido
+  VP --> Client : 400 Bad Request
+else valido
+  VP -> Ctrl : dto
+  Ctrl -> UC : execute(input)
+  UC -> Catalog : getVariantBySku(sku)
+  Catalog --> UC : CatalogVariant | null
+  alt variante inexistente
+    UC --> Ctrl : VariantNotFoundError
+    Ctrl --> Client : 404 Not Found
+  else variante existe
+    UC -> UC : construir StockMovement (dominio)
+    UC -> Repo : register(movement, idempotencyKey)
+    activate Repo
+    Repo -> DB : BEGIN
+    Repo -> DB : upsert stock_items + UPDATE atomico
+    Repo -> DB : INSERT stock_movements
+    Repo -> DB : COMMIT
+    alt stock insuficiente
+      Repo --> UC : insufficient
+      UC --> Ctrl : InsufficientStockError
+      Ctrl --> Client : 409 Conflict
+    else idempotency key duplicada
+      Repo --> UC : duplicate
+      UC --> Ctrl : MovementAlreadyProcessedError
+      Ctrl --> Client : 409 Conflict
+    else ok
+      Repo --> UC : applied(available)
+      deactivate Repo
+      UC --> Ctrl : result
+      Ctrl --> Client : 201 Created { available }
+    end
+  end
+end
+@enduml

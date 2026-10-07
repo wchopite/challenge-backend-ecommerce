@@ -1,0 +1,26 @@
+@startuml
+title GET /stock/variants/{sku} — consultar disponibilidad
+autonumber
+actor "Cliente" as Client
+participant "StockController" as Ctrl
+participant "GetVariantAvailabilityUseCase" as UC
+participant "CatalogReader (contrato -> Catalog)" as Catalog
+participant "StockRepository" as Repo
+database "PostgreSQL" as DB
+
+Client -> Ctrl : GET /stock/variants/{sku}
+Ctrl -> UC : execute(sku)
+UC -> Catalog : getVariantBySku(sku)
+Catalog --> UC : CatalogVariant | null
+alt variante inexistente
+  UC --> Ctrl : VariantNotFoundError
+  Ctrl --> Client : 404 Not Found
+else variante existe
+  UC -> Repo : getAvailable(variantId)
+  Repo -> DB : SELECT available FROM stock_items
+  DB --> Repo : available
+  Repo --> UC : available (0 si no hay fila)
+  UC --> Ctrl : { sku, available }
+  Ctrl --> Client : 200 OK { sku, available }
+end
+@enduml

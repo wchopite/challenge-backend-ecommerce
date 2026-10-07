@@ -46,6 +46,24 @@ This repo is the starting point for the challenge. It uses NestJS 12, TypeORM 1,
 
 TypeScript is configured in strict mode with sensible additional rules (`noUncheckedIndexedAccess`, explicit return types, no `any`, no floating promises, etc.). Run `npm run typecheck` and `npm run lint` before submitting.
 
+## Diagrams
+
+Stock module flow:
+
+![Stock module flow](docs/diagrams/bidcom-stock-module.png)
+
+Data model (bounded contexts `Catalog` and `Stock`):
+
+![Data model](docs/diagrams/bidcom_database.png)
+
+Sequence — `POST /stock/movimientos`:
+
+![POST stock movement](docs/diagrams/stock-movement-sequence.svg)
+
+Sequence — `GET /stock/variants/:sku`:
+
+![GET variant availability](docs/diagrams/stock-availability-sequence.svg)
+
 ## Project structure
 
 Two empty NestJS modules are included: `catalog` and `stock`. Use them, rename them, or reorganize — whatever fits your design.
