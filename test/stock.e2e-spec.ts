@@ -154,4 +154,36 @@ describe('Stock endpoints (e2e)', () => {
       .send({ sku, quantity: 1, motive: 'PURCHASE' })
       .expect(201);
   });
+
+  it('returns a generated x-request-id header when none is provided', async () => {
+    const response = await request(app.getHttpServer()).get(`/stock/variants/${sku}`).expect(200);
+
+    expect(response.headers['x-request-id']).toEqual(expect.any(String));
+    expect(response.headers['x-request-id']).not.toBe('');
+  });
+
+  it('honors the incoming x-request-id and echoes it on domain errors', async () => {
+    const correlationId = `e2e-corr-${randomUUID()}`;
+
+    const response = await request(app.getHttpServer())
+      .post('/stock/movimientos')
+      .set('x-request-id', correlationId)
+      .send({ sku: 'UNKNOWN', quantity: 1, motive: 'PURCHASE' })
+      .expect(404);
+
+    expect(response.headers['x-request-id']).toBe(correlationId);
+    expect(response.body.requestId).toBe(correlationId);
+  });
+
+  it('includes the request id in validation error responses', async () => {
+    const correlationId = `e2e-corr-${randomUUID()}`;
+
+    const response = await request(app.getHttpServer())
+      .post('/stock/movimientos')
+      .set('x-request-id', correlationId)
+      .send({ sku, quantity: 0, motive: 'PURCHASE' })
+      .expect(400);
+
+    expect(response.body.requestId).toBe(correlationId);
+  });
 });
