@@ -11,6 +11,6 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD ?? 'postgres',
   database: process.env.DB_DATABASE ?? 'ecommerce_challenge',
   entities: ['src/**/*.orm-entity.ts'],
-  migrations: ['db/migrations/*.ts'],
+  migrations: ['src/shared/infrastructure/database/migrations/*.ts'],
   synchronize: false,
 });

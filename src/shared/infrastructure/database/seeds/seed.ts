@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { DataSource } from 'typeorm';
-import { AppModule } from './app.module.js';
-import { SeedService } from './shared/infrastructure/database/seeds/seed.service.js';
+import { AppModule } from '../../../../app.module.js';
 import {
   REGISTER_STOCK_MOVEMENT,
   type RegisterStockMovement,
-} from './stock/domain/ports/in/register-stock-movement.js';
+} from '../../../../stock/domain/ports/in/register-stock-movement.js';
+import { SeedService } from './seed.service.js';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.createApplicationContext(AppModule, {
