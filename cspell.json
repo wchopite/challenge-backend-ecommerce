@@ -35,6 +35,6 @@
     "coverage/**",
     "package-lock.json",
     "*.tsbuildinfo",
-    "docs/diagrams/*.svg"
+    "docs/**/*.svg"
   ]
 }

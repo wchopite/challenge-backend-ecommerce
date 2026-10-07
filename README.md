@@ -50,19 +50,19 @@ TypeScript is configured in strict mode with sensible additional rules (`noUnche
 
 Stock module flow:
 
-![Stock module flow](docs/diagrams/bidcom-stock-module.png)
+![Stock module flow](docs/architecture/module-structure.png)
 
 Data model (bounded contexts `Catalog` and `Stock`):
 
-![Data model](docs/diagrams/bidcom_database.png)
+![Data model](docs/architecture/data-model.png)
 
 Sequence — `POST /stock/movimientos`:
 
-![POST stock movement](docs/diagrams/stock-movement-sequence.svg)
+![POST stock movement](docs/stock/register-movement-sequence.svg)
 
 Sequence — `GET /stock/variants/:sku`:
 
-![GET variant availability](docs/diagrams/stock-availability-sequence.svg)
+![GET variant availability](docs/stock/check-availability-sequence.svg)
 
 ## Project structure
 
