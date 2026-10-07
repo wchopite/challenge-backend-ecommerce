@@ -22,9 +22,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
     const status = STATUS_BY_CODE[exception.code];
+    const requestId = this.requestContext.getRequestId();
 
     const payload = {
-      requestId: this.requestContext.getRequestId(),
       error: exception.name,
       code: exception.code,
       statusCode: status,
@@ -40,6 +40,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
       statusCode: status,
       error: exception.name,
       message: exception.message,
+      requestId,
     });
   }
 }
