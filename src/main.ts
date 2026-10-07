@@ -16,8 +16,8 @@ async function bootstrap(): Promise<void> {
   const rawPort = process.env.PORT;
   const port = rawPort !== undefined ? Number(rawPort) : 3000;
 
-  if (Number.isNaN(port)) {
-    throw new Error('PORT must be a valid number');
+  if (!Number.isInteger(port) || port <= 0) {
+    throw new Error('PORT must be a positive integer');
   }
 
   await app.listen(port);
