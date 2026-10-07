@@ -16,7 +16,7 @@ class InMemoryVariantCatalog implements VariantCatalog {
 class InMemoryStockRepository implements StockRepository {
   constructor(private readonly balances: ReadonlyMap<string, number> = new Map()) {}
 
-  register(_movement: StockMovement): Promise<RegisterMovementOutcome> {
+  register(_movement: StockMovement, _idempotencyKey: string): Promise<RegisterMovementOutcome> {
     throw new Error('register is not used in this test');
   }
 

@@ -37,7 +37,7 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
       occurredAt: new Date(),
     };
 
-    const outcome = await this.stock.register(movement);
+    const outcome = await this.stock.register(movement, input.idempotencyKey);
 
     if (outcome.status === MovementStatus.INSUFFICIENT) {
       throw new InsufficientStockError(outcome.available, input.quantity);

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+} from '@nestjs/common';
 import {
   GET_VARIANT_AVAILABILITY,
   type GetVariantAvailability,
@@ -20,11 +31,19 @@ export class StockController {
 
   @Post('movimientos')
   @HttpCode(HttpStatus.CREATED)
-  register(@Body() dto: RegisterStockMovementDto): Promise<StockMovementResponseDto> {
+  register(
+    @Body() dto: RegisterStockMovementDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ): Promise<StockMovementResponseDto> {
+    if (idempotencyKey === undefined || idempotencyKey.trim() === '') {
+      throw new BadRequestException('Idempotency-Key header is required');
+    }
+
     return this.registerMovement.execute({
       sku: dto.sku,
       quantity: dto.quantity,
       motive: dto.motive,
+      idempotencyKey,
     });
   }
 

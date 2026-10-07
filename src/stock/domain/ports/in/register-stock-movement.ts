@@ -4,6 +4,7 @@ export interface RegisterStockMovementInput {
   readonly sku: string;
   readonly quantity: number;
   readonly motive: Motive;
+  readonly idempotencyKey: string;
 }
 
 export interface StockMovementResult {

@@ -27,7 +27,7 @@ class InMemoryStockRepository implements StockRepository {
     this.balances.set(variantId, available);
   }
 
-  register(movement: StockMovement): Promise<RegisterMovementOutcome> {
+  register(movement: StockMovement, _idempotencyKey: string): Promise<RegisterMovementOutcome> {
     const current = this.balances.get(movement.variantId) ?? 0;
     const next = current + deltaOf(movement.motive, movement.quantity);
 
@@ -60,6 +60,7 @@ describe('RegisterStockMovementUseCase', () => {
       sku: 'SKU-1',
       quantity: 5,
       motive: Motive.PURCHASE,
+      idempotencyKey: 'key-1',
     });
 
     expect(result.available).toBe(7);
@@ -75,6 +76,7 @@ describe('RegisterStockMovementUseCase', () => {
       sku: 'SKU-1',
       quantity: 3,
       motive: Motive.SALE,
+      idempotencyKey: 'key-2',
     });
 
     expect(result.available).toBe(7);
@@ -85,7 +87,12 @@ describe('RegisterStockMovementUseCase', () => {
     stock.seed(variant.id, 2);
 
     await expect(
-      build(stock).execute({ sku: 'SKU-1', quantity: 5, motive: Motive.SALE }),
+      build(stock).execute({
+        sku: 'SKU-1',
+        quantity: 5,
+        motive: Motive.SALE,
+        idempotencyKey: 'key-3',
+      }),
     ).rejects.toThrow(InsufficientStockError);
 
     expect(stock.movements).toHaveLength(0);
@@ -95,7 +102,12 @@ describe('RegisterStockMovementUseCase', () => {
     const stock = new InMemoryStockRepository();
 
     await expect(
-      build(stock).execute({ sku: 'UNKNOWN', quantity: 1, motive: Motive.PURCHASE }),
+      build(stock).execute({
+        sku: 'UNKNOWN',
+        quantity: 1,
+        motive: Motive.PURCHASE,
+        idempotencyKey: 'key-4',
+      }),
     ).rejects.toThrow(VariantNotFoundError);
   });
 
@@ -103,7 +115,12 @@ describe('RegisterStockMovementUseCase', () => {
     const stock = new InMemoryStockRepository();
 
     await expect(
-      build(stock).execute({ sku: 'SKU-1', quantity: 0, motive: Motive.PURCHASE }),
+      build(stock).execute({
+        sku: 'SKU-1',
+        quantity: 0,
+        motive: Motive.PURCHASE,
+        idempotencyKey: 'key-5',
+      }),
     ).rejects.toThrow(InvalidQuantityError);
   });
 });

@@ -18,6 +18,9 @@ export class StockMovementOrmEntity {
   @Column({ type: 'varchar' })
   motive: Motive;
 
+  @Column({ name: 'idempotency_key', type: 'varchar', nullable: true })
+  idempotencyKey: string | null;
+
   @Column({ name: 'occurred_at', type: 'timestamptz' })
   occurredAt: Date;
 }

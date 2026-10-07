@@ -78,6 +78,7 @@ describe('Stock endpoints (e2e)', () => {
   it('registers an inbound movement and reports availability', async () => {
     await request(app.getHttpServer())
       .post('/stock/movimientos')
+      .set('Idempotency-Key', 'e2e-in-1')
       .send({ sku, quantity: 5, motive: 'PURCHASE' })
       .expect(201)
       .expect((response) => {
@@ -93,6 +94,7 @@ describe('Stock endpoints (e2e)', () => {
   it('registers an outbound movement', async () => {
     await request(app.getHttpServer())
       .post('/stock/movimientos')
+      .set('Idempotency-Key', 'e2e-out-1')
       .send({ sku, quantity: 3, motive: 'SALE' })
       .expect(201)
       .expect((response) => {
@@ -103,6 +105,7 @@ describe('Stock endpoints (e2e)', () => {
   it('rejects an outbound movement without enough stock (409)', async () => {
     await request(app.getHttpServer())
       .post('/stock/movimientos')
+      .set('Idempotency-Key', 'e2e-insufficient')
       .send({ sku, quantity: 100, motive: 'SALE' })
       .expect(409);
   });
@@ -110,6 +113,7 @@ describe('Stock endpoints (e2e)', () => {
   it('rejects an unknown SKU (404)', async () => {
     await request(app.getHttpServer())
       .post('/stock/movimientos')
+      .set('Idempotency-Key', 'e2e-unknown')
       .send({ sku: 'UNKNOWN', quantity: 1, motive: 'PURCHASE' })
       .expect(404);
   });
@@ -117,6 +121,7 @@ describe('Stock endpoints (e2e)', () => {
   it('rejects an invalid payload (400)', async () => {
     await request(app.getHttpServer())
       .post('/stock/movimientos')
+      .set('Idempotency-Key', 'e2e-invalid')
       .send({ sku, quantity: 0, motive: 'PURCHASE' })
       .expect(400);
   });

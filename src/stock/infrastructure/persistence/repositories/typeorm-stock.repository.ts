@@ -20,7 +20,10 @@ export class TypeOrmStockRepository implements StockRepository {
     private readonly items: Repository<StockItemOrmEntity>,
   ) {}
 
-  async register(movement: StockMovement): Promise<RegisterMovementOutcome> {
+  async register(
+    movement: StockMovement,
+    idempotencyKey: string,
+  ): Promise<RegisterMovementOutcome> {
     return this.dataSource.transaction(async (manager) => {
       await manager
         .createQueryBuilder()
@@ -56,7 +59,10 @@ export class TypeOrmStockRepository implements StockRepository {
           .execute();
       }
 
-      await manager.insert(StockMovementOrmEntity, StockMovementMapper.toOrm(movement));
+      await manager.insert(
+        StockMovementOrmEntity,
+        StockMovementMapper.toOrm(movement, idempotencyKey),
+      );
 
       const item = await manager.findOne(StockItemOrmEntity, {
         where: { variantId: movement.variantId },
