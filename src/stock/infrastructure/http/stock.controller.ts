@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -35,22 +35,18 @@ export class StockController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a stock movement (inbound or outbound)' })
   @ApiResponse({ status: 201, description: 'Movement registered', type: StockMovementResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid payload or missing Idempotency-Key' })
+  @ApiResponse({ status: 400, description: 'Invalid payload' })
   @ApiResponse({ status: 404, description: 'Variant not found' })
   @ApiResponse({ status: 409, description: 'Insufficient stock or duplicated idempotency key' })
   register(
     @Body() dto: RegisterStockMovementDto,
     @Headers('idempotency-key') idempotencyKey?: string,
   ): Promise<StockMovementResponseDto> {
-    if (idempotencyKey === undefined || idempotencyKey.trim() === '') {
-      throw new BadRequestException('Idempotency-Key header is required');
-    }
-
     return this.registerMovement.execute({
       sku: dto.sku,
       quantity: dto.quantity,
       motive: dto.motive,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey?.trim() || randomUUID(),
     });
   }
 

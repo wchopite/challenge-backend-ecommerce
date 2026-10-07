@@ -147,4 +147,11 @@ describe('Stock endpoints (e2e)', () => {
 
     expect(after.body.available).toBe((before.body.available as number) + 2);
   });
+
+  it('registers a movement without an Idempotency-Key header (201)', async () => {
+    await request(app.getHttpServer())
+      .post('/stock/movimientos')
+      .send({ sku, quantity: 1, motive: 'PURCHASE' })
+      .expect(201);
+  });
 });
