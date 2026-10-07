@@ -120,6 +120,8 @@ Secuencia — `GET /stock/variants/:sku`:
 - El saldo se actualiza en una **transacción** con `UPDATE` condicional, así que
   dos salidas simultáneas no sobrevenden.
 - El saldo vive en `stock_items` y el historial en `stock_movements`.
+- Dejé **todo en `main` a propósito**: así la historia se lee lineal y se sigue el
+  paso a paso. En un equipo, lo ideal es trabajar con **feature branches** + PRs.
 
 ## Tests
 
