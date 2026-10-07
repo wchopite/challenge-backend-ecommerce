@@ -197,9 +197,11 @@ Cosas que dejaría para una próxima iteración:
 
 - Tests de carga con **k6** (varios escenarios: muchos `SALE` concurrentes sobre
   el mismo SKU, picos de lectura de disponibilidad, etc.).
-- **Índices** en la BD según las consultas reales (ej. GIN sobre `variants.attributes`
-  o un índice de expresión para una clave caliente; hoy ya hay `UNIQUE` en `sku`,
-  `variant_id` e `idempotency_key`).
+- **Índices** en la BD según las consultas reales. Hoy hay `UNIQUE` en `sku`,
+  `variant_id` e `idempotency_key`, más índices en las FK (`products.category_id`,
+  `variants.product_id`). Quedaría sumar GIN sobre `variants.attributes` y un
+  compuesto `(variant_id, occurred_at)` en `stock_movements` cuando exista la query
+  de historial.
 - **Cache** (ej. Redis) para lecturas de disponibilidad/catálogo, si el tráfico lo pide.
 
 **Infra / entrega**
