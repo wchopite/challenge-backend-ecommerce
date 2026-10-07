@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "streetsidesoftware.code-spell-checker",
-    "humao.rest-client"
+    "humao.rest-client",
+    "jebbs.plantuml"
   ]
 }

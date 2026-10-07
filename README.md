@@ -64,6 +64,8 @@ Sequence — `GET /stock/variants/:sku`:
 
 ![GET variant availability](docs/stock/check-availability-sequence.svg)
 
+> Sequence diagrams are authored in PlantUML (`docs/stock/*.puml`). Regenerate the SVGs with `npm run diagrams:render`.
+
 ## Project structure
 
 Two empty NestJS modules are included: `catalog` and `stock`. Use them, rename them, or reorganize — whatever fits your design.
