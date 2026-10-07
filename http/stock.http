@@ -1,0 +1,80 @@
+@baseUrl = http://localhost:3000
+
+### Availability — seeded SKU (200)
+GET {{baseUrl}}/stock/variants/RUN-42-BLACK
+
+### Register inbound movement — PURCHASE (201)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 5,
+  "motive": "PURCHASE"
+}
+
+### Register outbound movement — SALE (201)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 2,
+  "motive": "SALE"
+}
+
+### Insufficient stock (409)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 999999,
+  "motive": "SALE"
+}
+
+### Duplicate idempotency key (409) — send this request twice
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: duplicate-demo
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 1,
+  "motive": "PURCHASE"
+}
+
+### Unknown SKU (404)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "sku": "NOPE",
+  "quantity": 1,
+  "motive": "PURCHASE"
+}
+
+### Invalid payload — quantity 0 (400)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 0,
+  "motive": "PURCHASE"
+}
+
+### Missing Idempotency-Key header (400)
+POST {{baseUrl}}/stock/movimientos
+Content-Type: application/json
+
+{
+  "sku": "RUN-42-BLACK",
+  "quantity": 1,
+  "motive": "PURCHASE"
+}
