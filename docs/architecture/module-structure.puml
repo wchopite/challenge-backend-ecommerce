@@ -1,0 +1,39 @@
+@startuml
+title Módulo Stock — POST /stock/movimientos
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+actor "Cliente" as Client
+
+rectangle "server" {
+  component "01 Validation Pipe" as VP
+  component "02 StockController" as Ctrl
+  component "03 RegisterStockMovementUseCase" as UC
+  component "04 CatalogReader\n<contrato -> Catalog>" as Catalog
+  rectangle "db transaction" {
+    component "05 Stock Movement" as SM
+    component "06 Stock Repository" as Repo
+  }
+}
+
+database "inventory db" as DB
+
+Client --> VP : POST /stock/movimientos\n{ sku, quantity, motive } + Idempotency-Key
+VP --> Ctrl
+Ctrl --> UC
+UC --> Catalog
+UC --> SM
+SM --> Repo
+Repo --> DB
+
+note right of VP
+  payload inválido -> 400
+end note
+note right of Catalog
+  variante inexistente -> 404
+end note
+note bottom of Repo
+  transacción: update atómico + insert movement
+  stock insuficiente -> 409
+end note
+@enduml

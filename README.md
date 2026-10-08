@@ -96,11 +96,11 @@ SKUs de ejemplo: `RUN-42-BLACK`, `RUN-43-BLACK`, `RUN-42-WHITE`,
 
 Flujo del módulo Stock:
 
-![Stock module flow](docs/architecture/module-structure.png)
+![Stock module flow](docs/architecture/module-structure.svg)
 
 Modelo de datos (contextos `Catalog` y `Stock`):
 
-![Data model](docs/architecture/data-model.png)
+![Data model](docs/architecture/data-model.svg)
 
 Secuencia — `POST /stock/movimientos`:
 
@@ -110,8 +110,8 @@ Secuencia — `GET /stock/variants/:sku`:
 
 ![GET variant availability](docs/stock/check-availability-sequence.svg)
 
-> Las secuencias están hechas en PlantUML (`docs/stock/*.puml`). Para regenerar los
-> SVG: `npm run diagrams:render`.
+> Todos los diagramas están hechos en PlantUML (`.puml`). Para regenerar los SVG:
+> `npm run diagrams:render` (requiere Docker).
 
 ## Decisiones
 

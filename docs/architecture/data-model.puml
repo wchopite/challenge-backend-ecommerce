@@ -1,0 +1,64 @@
+@startuml
+title Modelo de datos — Catálogo (Catalog) y Stock
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+
+entity "categories" as categories {
+  * id : uuid <<PK>>
+  --
+  name : varchar <<unique>>
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "products" as products {
+  * id : uuid <<PK>>
+  --
+  category_id : uuid <<FK>>
+  name : varchar
+  description : text
+  price_cents : int
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "variants" as variants {
+  * id : uuid <<PK>>
+  --
+  product_id : uuid <<FK>>
+  sku : varchar <<unique>>
+  attributes : jsonb
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "stock_items" as stock_items {
+  * id : uuid <<PK>>
+  --
+  variant_id : uuid <<unique>>
+  available : int
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "stock_movements" as stock_movements {
+  * id : uuid <<PK>>
+  --
+  variant_id : uuid
+  sku : varchar
+  quantity : int
+  motive : varchar
+  idempotency_key : varchar <<unique>>
+  occurred_at : timestamptz
+}
+
+categories ||--o{ products : contiene
+products ||--o{ variants : contiene
+variants ||..o{ stock_items : "referencia sin FK"
+variants ||..o{ stock_movements : "referencia sin FK"
+
+note bottom of stock_items
+  CHECK (available >= 0)
+end note
+@enduml

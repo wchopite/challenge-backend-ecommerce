@@ -13,7 +13,7 @@
     "build": "nest build",
     "seed": "nest build && node dist/shared/infrastructure/database/seeds/seed.js",
     "db:setup": "npm run migration:run && npm run seed",
-    "diagrams:render": "docker run --rm -v \"$PWD/docs\":/data plantuml/plantuml -tsvg /data/stock/register-movement-sequence.puml /data/stock/check-availability-sequence.puml",
+    "diagrams:render": "docker run --rm -v \"$PWD/docs\":/data plantuml/plantuml -nometadata -tsvg /data/stock/register-movement-sequence.puml /data/stock/check-availability-sequence.puml /data/architecture/module-structure.puml /data/architecture/data-model.puml",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
