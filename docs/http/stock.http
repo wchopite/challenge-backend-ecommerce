@@ -47,10 +47,11 @@ Idempotency-Key: duplicate-demo
   "motive": "PURCHASE"
 }
 
-### Unknown SKU (404)
+### Unknown SKU (404) — la respuesta incluye el `requestId` (correlación)
 POST {{baseUrl}}/stock/movimientos
 Content-Type: application/json
 Idempotency-Key: {{$guid}}
+x-request-id: demo-404
 
 {
   "sku": "NOPE",
@@ -69,7 +70,7 @@ Idempotency-Key: {{$guid}}
   "motive": "PURCHASE"
 }
 
-### Missing Idempotency-Key header (400)
+### No Idempotency-Key header — no es idempotente (201)
 POST {{baseUrl}}/stock/movimientos
 Content-Type: application/json
 

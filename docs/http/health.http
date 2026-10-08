@@ -1,4 +1,10 @@
 @baseUrl = http://localhost:3000
 
-### Health check
+### Liveness — proceso vivo (sin dependencias)
+GET {{baseUrl}}/health/live
+
+### Readiness — chequea la base
+GET {{baseUrl}}/health/ready
+
+### Health (alias de readiness)
 GET {{baseUrl}}/health
