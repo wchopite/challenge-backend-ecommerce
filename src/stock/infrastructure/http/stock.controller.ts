@@ -10,7 +10,8 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ErrorResponseDto } from '../../../shared/infrastructure/http/dto/error-response.dto.js';
 import {
   GET_VARIANT_AVAILABILITY,
   type GetVariantAvailability,
@@ -34,10 +35,24 @@ export class StockController {
   @Post('movimientos')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a stock movement (inbound or outbound)' })
-  @ApiResponse({ status: 201, description: 'Movement registered', type: StockMovementResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid payload' })
-  @ApiResponse({ status: 404, description: 'Variant not found' })
-  @ApiResponse({ status: 409, description: 'Insufficient stock or duplicated idempotency key' })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    required: false,
+    description: 'Optional. Repeating the same key does not duplicate the movement (409).',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Movement registered',
+    type: StockMovementResponseDto,
+    headers: { 'x-request-id': { description: 'Correlation id', schema: { type: 'string' } } },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid payload', type: ErrorResponseDto })
+  @ApiResponse({ status: 404, description: 'Variant not found', type: ErrorResponseDto })
+  @ApiResponse({
+    status: 409,
+    description: 'Insufficient stock or duplicated idempotency key',
+    type: ErrorResponseDto,
+  })
   register(
     @Body() dto: RegisterStockMovementDto,
     @Headers('idempotency-key') idempotencyKey?: string,
@@ -53,8 +68,13 @@ export class StockController {
   @Get('variants/:sku')
   @ApiOperation({ summary: 'Get the available stock for a variant' })
   @ApiParam({ name: 'sku', description: 'Variant SKU', example: 'RUN-42-BLACK' })
-  @ApiResponse({ status: 200, description: 'Availability', type: VariantAvailabilityResponseDto })
-  @ApiResponse({ status: 404, description: 'Variant not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Availability',
+    type: VariantAvailabilityResponseDto,
+    headers: { 'x-request-id': { description: 'Correlation id', schema: { type: 'string' } } },
+  })
+  @ApiResponse({ status: 404, description: 'Variant not found', type: ErrorResponseDto })
   availability(@Param('sku') sku: string): Promise<VariantAvailabilityResponseDto> {
     return this.getAvailability.execute(sku);
   }
