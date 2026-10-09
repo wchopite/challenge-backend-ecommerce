@@ -44,9 +44,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   private resolveStatus(exception: unknown): HttpStatus {
-    return exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    if (exception instanceof HttpException) {
+      return exception.getStatus();
+    }
+
+    return this.statusFrom(exception) ?? HttpStatus.INTERNAL_SERVER_ERROR;
+  }
+
+  private statusFrom(exception: unknown): HttpStatus | undefined {
+    const candidate = exception as { status?: unknown; statusCode?: unknown };
+    const raw = typeof candidate.status === 'number' ? candidate.status : candidate.statusCode;
+    if (typeof raw === 'number' && raw >= 400 && raw <= 599) {
+      return raw;
+    }
+    return undefined;
   }
 
   private buildBody(
@@ -55,11 +66,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
     requestId: string | undefined,
   ): Record<string, unknown> {
     if (!(exception instanceof HttpException)) {
+      if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+        return {
+          requestId,
+          statusCode: status,
+          error: 'InternalServerError',
+          message: 'Internal server error',
+        };
+      }
+
       return {
         requestId,
         statusCode: status,
-        error: 'InternalServerError',
-        message: 'Internal server error',
+        error: exception instanceof Error ? exception.name : 'Error',
+        message: this.describe(exception),
       };
     }
 
