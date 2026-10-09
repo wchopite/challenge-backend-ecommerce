@@ -4,6 +4,12 @@ Backend de catálogo y stock para el challenge de Bidcom. La idea: manejar
 productos (con categorías y variantes) y el stock de cada variante, dejando
 registrado cada movimiento.
 
+![Node](https://img.shields.io/badge/node-24-3C873A?logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+
 ## Stack
 
 - Node 24 (LTS) + TypeScript estricto (ESM)
