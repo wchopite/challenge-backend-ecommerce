@@ -11,6 +11,7 @@ registrado cada movimiento.
 - Jest para tests (unit + e2e)
 - ESLint + Prettier, Husky + commitlint
 - Swagger (OpenAPI) y logs estructurados (pino + CLS) con correlation id (`x-request-id`)
+- Seguridad: `helmet` (headers), sin `x-powered-by` y límite de body
 
 ## Cómo correrlo
 
@@ -34,7 +35,7 @@ docker compose --profile app up --build
 
 La app queda en `http://localhost:3000`:
 
-- Swagger: `http://localhost:3000/docs`
+- Swagger: `http://localhost:3000/docs` (solo en dev; en producción no se expone)
 - Adminer: `http://localhost:8080` (Server: `postgres`; user/pass/db salen del `.env`)
 
 ## Módulos
@@ -51,13 +52,13 @@ mañana Stock se separa en un servicio, se cambia el adaptador por uno HTTP y li
 
 ## Endpoints
 
-| Método | Ruta                   | Qué hace                    |
-| ------ | ---------------------- | --------------------------- |
-| POST   | `/stock/movimientos`   | Registra un movimiento      |
-| GET    | `/stock/variants/:sku` | Disponible de una variante  |
-| GET    | `/health/live`         | Liveness                    |
-| GET    | `/health/ready`        | Readiness (chequea la base) |
-| GET    | `/docs`                | Swagger                     |
+| Método | Ruta                   | Qué hace                     |
+| ------ | ---------------------- | ---------------------------- |
+| POST   | `/stock/movimientos`   | Registra un movimiento       |
+| GET    | `/stock/variants/:sku` | Disponible de una variante   |
+| GET    | `/health/live`         | Liveness                     |
+| GET    | `/health/ready`        | Readiness (chequea la base)  |
+| GET    | `/docs`                | Swagger (solo fuera de prod) |
 
 **`POST /stock/movimientos`**
 
@@ -67,8 +68,8 @@ header: Idempotency-Key (opcional; si lo envías, es idempotente)
 ```
 
 Respuestas: `201` ok · `400` body inválido · `404` SKU inexistente ·
-`409` sin stock suficiente o key repetida. Todas las respuestas de error
-incluyen `requestId`.
+`409` sin stock suficiente o key repetida · `413` body demasiado grande.
+Todas las respuestas de error incluyen `requestId`.
 
 Motivos: `PURCHASE`, `RETURN`, `ADJUSTMENT_IN` suman; `SALE`, `LOSS`,
 `ADJUSTMENT_OUT` restan. La cantidad siempre es positiva y el motivo define la
@@ -76,7 +77,7 @@ dirección.
 
 ## Probarlo
 
-- **Swagger**: abre `/docs` y prueba desde ahí.
+- **Swagger**: abre `/docs` y prueba desde ahí (disponible solo fuera de producción).
 - **REST Client**: `docs/http/stock.http` (y `health.http`).
 - **curl**:
 
@@ -171,9 +172,13 @@ Cosas que dejaría para una próxima iteración:
 
 **Seguridad**
 
+Ya aplicado: `helmet` (headers de seguridad, sin `x-powered-by`), límite de body
+(16kb) y Swagger deshabilitado en producción. Pendiente:
+
 - Auth con JWT (guard global + `@Public`) y roles. Encaja con el dominio: un
   ajuste manual (`ADJUSTMENT_*`) pediría rol admin; `SALE` lo hace el sistema.
 - Rate limiting en los endpoints de lectura (`@nestjs/throttler`).
+- CORS explícito (allowlist) si aparece un front en otro origen.
 
 **Evolución**
 
