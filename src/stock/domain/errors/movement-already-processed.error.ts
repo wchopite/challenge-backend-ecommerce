@@ -1,10 +1,14 @@
 import { DomainError, DomainErrorCode } from '../../../shared/domain/errors/domain.error.js';
 
 export class MovementAlreadyProcessedError extends DomainError {
-  constructor(readonly idempotencyKey: string) {
+  constructor(
+    readonly idempotencyKey: string,
+    details: Record<string, unknown> = {},
+  ) {
     super(
       `A movement was already registered for idempotency key ${idempotencyKey}`,
       DomainErrorCode.CONFLICT,
+      { idempotencyKey, ...details },
     );
   }
 }

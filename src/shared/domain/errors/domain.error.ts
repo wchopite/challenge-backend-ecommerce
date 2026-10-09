@@ -10,6 +10,7 @@ export abstract class DomainError extends Error {
   protected constructor(
     message: string,
     readonly code: DomainErrorCode,
+    readonly details: Readonly<Record<string, unknown>> = {},
   ) {
     super(message);
     this.name = new.target.name;

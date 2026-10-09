@@ -43,14 +43,22 @@ export class RegisterStockMovementUseCase implements RegisterStockMovement {
     const outcome = await this.stock.register(movement, input.idempotencyKey);
 
     if (outcome.status === MovementStatus.INSUFFICIENT) {
-      throw new InsufficientStockError(outcome.available, input.quantity);
+      throw new InsufficientStockError(outcome.available, input.quantity, {
+        sku: input.sku,
+        motive: input.motive,
+      });
     }
 
     if (outcome.status === MovementStatus.DUPLICATE) {
-      throw new MovementAlreadyProcessedError(input.idempotencyKey);
+      throw new MovementAlreadyProcessedError(input.idempotencyKey, {
+        sku: input.sku,
+        motive: input.motive,
+      });
     }
 
     this.logger.log({
+      movementId: movement.id,
+      variantId: movement.variantId,
       sku: movement.sku,
       motive: movement.motive,
       quantity: movement.quantity,

@@ -4,10 +4,12 @@ export class InsufficientStockError extends DomainError {
   constructor(
     readonly available: number,
     readonly requested: number,
+    details: Record<string, unknown> = {},
   ) {
     super(
       `Insufficient stock: available ${available}, requested ${requested}`,
       DomainErrorCode.CONFLICT,
+      { available, requested, ...details },
     );
   }
 }

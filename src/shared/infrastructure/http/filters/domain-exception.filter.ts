@@ -1,5 +1,5 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpStatus } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
 import { DomainError, DomainErrorCode } from '../../../domain/errors/domain.error.js';
 import { RequestContextService } from '../../observability/request-context.service.js';
@@ -20,7 +20,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
   }
 
   catch(exception: DomainError, host: ArgumentsHost): void {
-    const response = host.switchToHttp().getResponse<Response>();
+    const http = host.switchToHttp();
+    const request = http.getRequest<Request>();
+    const response = http.getResponse<Response>();
     const status = STATUS_BY_CODE[exception.code];
     const requestId = this.requestContext.getRequestId();
 
@@ -28,6 +30,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
       error: exception.name,
       code: exception.code,
       statusCode: status,
+      method: request.method,
+      path: request.originalUrl,
+      ...exception.details,
     };
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
